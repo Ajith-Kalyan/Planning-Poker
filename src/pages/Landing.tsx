@@ -6,24 +6,51 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useSocket } from '@/context/SocketContext';
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+const formSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  roomCode: z.string().optional(),
+});
 
 const Landing = () => {
   const navigate = useNavigate();
   const { socket } = useSocket();
   const { toast } = useToast();
-  const [roomCode, setRoomCode] = useState('');
+  const [activeTab, setActiveTab] = useState('join');
 
-  const handleCreateRoom = () => {
+  const joinForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      roomCode: "",
+    },
+  });
+
+  const createForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+    },
+  });
+
+  const handleCreateRoom = (values: z.infer<typeof formSchema>) => {
     if (!socket) return;
     
-    socket.emit('create_room', {}, (response: { roomId: string }) => {
+    socket.emit('create_room', { username: values.username }, (response: { roomId: string }) => {
       console.log('Room created:', response.roomId);
       navigate(`/room/${response.roomId}`);
     });
   };
 
-  const handleJoinRoom = () => {
-    if (!socket || !roomCode.trim()) {
+  const handleJoinRoom = (values: z.infer<typeof formSchema>) => {
+    if (!socket || !values.roomCode?.trim()) {
       toast({
         title: "Error",
         description: "Please enter a valid room code",
@@ -32,9 +59,12 @@ const Landing = () => {
       return;
     }
 
-    socket.emit('join_room', { roomId: roomCode }, (response: { success: boolean, error?: string }) => {
+    socket.emit('join_room', { 
+      roomId: values.roomCode,
+      username: values.username 
+    }, (response: { success: boolean, error?: string }) => {
       if (response.success) {
-        navigate(`/room/${roomCode}`);
+        navigate(`/room/${values.roomCode}`);
       } else {
         toast({
           title: "Error",
@@ -52,27 +82,67 @@ const Landing = () => {
           <CardTitle className="text-2xl text-center">Planning Poker</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="join" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="join">Join Room</TabsTrigger>
               <TabsTrigger value="create">Create Room</TabsTrigger>
             </TabsList>
             <TabsContent value="join">
-              <div className="space-y-4">
-                <Input
-                  placeholder="Enter room code"
-                  value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value)}
-                />
-                <Button className="w-full" onClick={handleJoinRoom}>
-                  Join Room
-                </Button>
-              </div>
+              <Form {...joinForm}>
+                <form onSubmit={joinForm.handleSubmit(handleJoinRoom)} className="space-y-4">
+                  <FormField
+                    control={joinForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={joinForm.control}
+                    name="roomCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Room Code</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter room code" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full">
+                    Join Room
+                  </Button>
+                </form>
+              </Form>
             </TabsContent>
             <TabsContent value="create">
-              <Button className="w-full" onClick={handleCreateRoom}>
-                Create New Room
-              </Button>
+              <Form {...createForm}>
+                <form onSubmit={createForm.handleSubmit(handleCreateRoom)} className="space-y-4">
+                  <FormField
+                    control={createForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full">
+                    Create New Room
+                  </Button>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         </CardContent>
