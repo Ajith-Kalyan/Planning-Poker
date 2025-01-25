@@ -30,7 +30,8 @@ const Room = () => {
   const [players, setPlayers] = useState<Player[]>(MOCK_PLAYERS);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const [isModerator, setIsModerator] = useState(false);
+  // Set isModerator to true for testing
+  const [isModerator, setIsModerator] = useState(true);
 
   useEffect(() => {
     if (!socket || !roomId) return;
@@ -79,6 +80,7 @@ const Room = () => {
   const handleReveal = () => {
     if (!socket) return;
     socket.emit('reveal_votes', { roomId });
+    setRevealed(true);
   };
 
   const handleReset = () => {
