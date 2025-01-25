@@ -10,20 +10,20 @@ import Room from "./pages/Room";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SocketProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <SocketProvider>
+        <TooltipProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/room/:roomId" element={<Room />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </SocketProvider>
-  </QueryClientProvider>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </SocketProvider>
+    </QueryClientProvider>
+  </BrowserRouter>
 );
 
 export default App;
