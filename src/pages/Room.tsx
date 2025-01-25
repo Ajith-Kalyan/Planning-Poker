@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { useSocket } from '@/context/SocketContext';
 import { useToast } from "@/components/ui/use-toast";
-import { PlanningCard } from '@/components/PlanningCard';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { RoomHeader } from '@/components/RoomHeader';
+import { PlayersGrid } from '@/components/PlayersGrid';
+import { CardsSelection } from '@/components/CardsSelection';
 
 interface Player {
   id: string;
@@ -13,13 +12,22 @@ interface Player {
   vote: string | null;
 }
 
-const CARDS = ['1', '2', '3', '5', '8', '13', '21', '?'];
+// Mock data for development and testing
+const MOCK_PLAYERS: Player[] = [
+  { id: '1', name: 'John Doe', vote: '5' },
+  { id: '2', name: 'Jane Smith', vote: '8' },
+  { id: '3', name: 'Alice Johnson', vote: null },
+  { id: '4', name: 'Bob Wilson', vote: '13' },
+  { id: '5', name: 'Carol Brown', vote: '3' },
+  { id: '6', name: 'David Clark', vote: null },
+  { id: '7', name: 'Eve Davis', vote: '21' },
+];
 
 const Room = () => {
   const { roomId } = useParams();
   const { socket } = useSocket();
   const { toast } = useToast();
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<Player[]>(MOCK_PLAYERS);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
@@ -86,75 +94,23 @@ const Room = () => {
     });
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Planning Poker</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={copyRoomCode}>
-              Room: {roomId}
-            </Button>
-            {isModerator && (
-              <div className="flex gap-2">
-                <Button onClick={handleReveal} disabled={revealed}>
-                  Reveal Cards
-                </Button>
-                <Button onClick={handleReset}>
-                  Reset Round
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Players Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {players.map((player) => (
-            <Card key={player.id} className="p-4">
-              <div className="flex flex-col items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback>{getInitials(player.name)}</AvatarFallback>
-                </Avatar>
-                <div className="text-center">
-                  <div className="font-semibold">{player.name}</div>
-                  <div className="mt-2 text-2xl">
-                    {revealed ? (
-                      player.vote || '?'
-                    ) : (
-                      player.vote ? '🎯' : '⏳'
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Cards Selection */}
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4">
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
-            {CARDS.map((value) => (
-              <PlanningCard
-                key={value}
-                value={value}
-                selected={selectedCard === value}
-                revealed={revealed}
-                onClick={() => handleCardSelect(value)}
-              />
-            ))}
-          </div>
-        </div>
+        <RoomHeader
+          roomId={roomId || ''}
+          isModerator={isModerator}
+          onReveal={handleReveal}
+          onReset={handleReset}
+          onCopyCode={copyRoomCode}
+          revealed={revealed}
+        />
+        <PlayersGrid players={players} revealed={revealed} />
+        <CardsSelection
+          selectedCard={selectedCard}
+          revealed={revealed}
+          onCardSelect={handleCardSelect}
+        />
       </div>
     </div>
   );
