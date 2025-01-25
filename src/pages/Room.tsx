@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useSocket } from '@/context/SocketContext';
 import { useToast } from "@/components/ui/use-toast";
 import { PlanningCard } from '@/components/PlanningCard';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Player {
   id: string;
@@ -31,18 +32,22 @@ const Room = () => {
     });
 
     socket.on('player_joined', (data: { players: Player[] }) => {
+      console.log('Player joined:', data);
       setPlayers(data.players);
     });
 
     socket.on('player_voted', (data: { players: Player[] }) => {
+      console.log('Player voted:', data);
       setPlayers(data.players);
     });
 
     socket.on('votes_revealed', () => {
+      console.log('Votes revealed');
       setRevealed(true);
     });
 
     socket.on('round_reset', () => {
+      console.log('Round reset');
       setRevealed(false);
       setSelectedCard(null);
       setPlayers(players.map(p => ({ ...p, vote: null })));
@@ -81,9 +86,19 @@ const Room = () => {
     });
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Planning Poker</h1>
           <div className="flex gap-2">
@@ -103,27 +118,42 @@ const Room = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Players Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {players.map((player) => (
-            <Card key={player.id} className="p-4 text-center">
-              <div className="font-semibold">{player.name}</div>
-              <div className="mt-2">
-                {revealed ? player.vote || 'No vote' : player.vote ? '🎯' : '⏳'}
+            <Card key={player.id} className="p-4">
+              <div className="flex flex-col items-center gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback>{getInitials(player.name)}</AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <div className="font-semibold">{player.name}</div>
+                  <div className="mt-2 text-2xl">
+                    {revealed ? (
+                      player.vote || '?'
+                    ) : (
+                      player.vote ? '🎯' : '⏳'
+                    )}
+                  </div>
+                </div>
               </div>
             </Card>
           ))}
         </div>
 
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
-          {CARDS.map((value) => (
-            <PlanningCard
-              key={value}
-              value={value}
-              selected={selectedCard === value}
-              revealed={revealed}
-              onClick={() => handleCardSelect(value)}
-            />
-          ))}
+        {/* Cards Selection */}
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+            {CARDS.map((value) => (
+              <PlanningCard
+                key={value}
+                value={value}
+                selected={selectedCard === value}
+                revealed={revealed}
+                onClick={() => handleCardSelect(value)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
