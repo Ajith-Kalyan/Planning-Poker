@@ -1,44 +1,28 @@
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PlayersGridProps } from "@/Models/constants";
 
-interface Player {
-  id: string;
-  name: string;
-  vote: string | null;
-}
 
-interface PlayersGridProps {
-  players: Player[];
-  revealed: boolean;
-}
+const getInitials = (name: string) => {
+  const nameParts = name.split(' ');
+  const initials = nameParts.map(part => part[0].toUpperCase()).join('');
+  return initials.length > 2 ? initials.substring(0, 2) : initials; // Ensure it's always 2 characters max
+};
 
 export const PlayersGrid = ({ players, revealed }: PlayersGridProps) => {
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {players.map((player) => (
-        <Card key={player.id} className="p-4">
-          <div className="flex flex-col items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback>{getInitials(player.name)}</AvatarFallback>
-            </Avatar>
-            <div className="text-center">
-              <div className="font-semibold">{player.name}</div>
-              <div className="mt-2 text-2xl">
-                {revealed ? (
-                  player.vote || '?'
-                ) : (
-                  player.vote ? '🎯' : '⏳'
-                )}
-              </div>
+        <Card key={player.id} className="p-4 w-40 h-56 border-2 border-gray-300 rounded-lg flex flex-col items-center justify-between">
+          <div className="text-center text-lg font-semibold">
+            {player.name.length > 10 ? getInitials(player.name) : player.name.toUpperCase()}
+          </div>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-4xl font-bold">
+              {revealed ? (
+                player.vote || '?'
+              ) : (
+                player.vote ? '🎯' : '⏳'
+              )}
             </div>
           </div>
         </Card>

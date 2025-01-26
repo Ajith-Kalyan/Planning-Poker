@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { getCardColor } from "@/Models/constants";
 
 interface PlanningCardProps {
   value: string;
@@ -22,8 +23,9 @@ export const PlanningCard = ({
         "flex items-center justify-center text-2xl font-bold",
         selected
           ? "border-blue-500 bg-blue-50 text-blue-700"
-          : "border-gray-200 bg-white text-gray-700 hover:border-blue-300",
-        revealed && "opacity-50"
+          : `border-gray-200 ${getCardColor(value)} text-gray-700 hover:border-blue-300`,
+        revealed && "opacity-50",
+        "card-animation"
       )}
     >
       {value}

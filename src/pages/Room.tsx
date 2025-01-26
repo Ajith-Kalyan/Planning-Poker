@@ -5,12 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { RoomHeader } from '@/components/RoomHeader';
 import { PlayersGrid } from '@/components/PlayersGrid';
 import { CardsSelection } from '@/components/CardsSelection';
-
-interface Player {
-  id: string;
-  name: string;
-  vote: string | null;
-}
+import { Player } from '@/Models/constants';
 
 const Room = () => {
   const { roomId } = useParams();

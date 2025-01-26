@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +21,7 @@ const formSchema = z.object({
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { socket } = useSocket(); // Ensure socket comes from context
+  const { socket } = useSocket();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('join');
 
@@ -50,7 +50,6 @@ const Landing = () => {
     }
   }, [socket, toast]);
 
-  // Handle room creation
   const handleCreateRoom = (values: z.infer<typeof formSchema>) => {
     if (!socket) {
       toast({
@@ -61,9 +60,8 @@ const Landing = () => {
       return;
     }
 
-    socket.emit("create_room", { username: values.username }, (response: { roomId: string, userId: string }) => {
+    socket.emit("create_room", { username: values.username }, (response: { roomId: string, userId: string, isModerator:boolean }) => {
       if (response?.roomId) {
-        console.log('Room created:', response.roomId);
         sessionStorage.setItem('roomInfo', JSON.stringify(response));
         navigate(`/room/${response.roomId}`);
       } else {
@@ -75,7 +73,6 @@ const Landing = () => {
       }
     });
   };
-
 
   const handleJoinRoom = (values: z.infer<typeof formSchema>) => {
     if (!socket || !values.roomCode?.trim()) {
@@ -90,9 +87,8 @@ const Landing = () => {
     socket.emit('join_room', {
       roomId: values.roomCode,
       username: values.username
-    }, (response: { success: boolean, error?: string, userId: string  }) => {
+    }, (response: { success: boolean, error?: string, userId: string }) => {
       if (response.success) {
-        console.log('Joined room:', values.roomCode);
         sessionStorage.setItem('roomInfo', JSON.stringify(response));
         navigate(`/room/${values.roomCode}`);
       } else {
@@ -106,16 +102,19 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center space-y-6 bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900">
+      <Card className="w-full max-w-md min-h-[400px] bg-white/10 backdrop-blur-lg border border-white/30 shadow-lg rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Planning Poker</CardTitle>
+          <CardTitle className="text-3xl font-semibold text-center font-sans text-white">
+            Planning Poker
+          </CardTitle>
+
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="join">Join Room</TabsTrigger>
-              <TabsTrigger value="create">Create Room</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 text-white bg-white/20 rounded-lg">
+              <TabsTrigger value="join" className="text-white data-[state=active]:bg-purple-500">Join Room</TabsTrigger>
+              <TabsTrigger value="create" className="text-white data-[state=active]:bg-purple-500">Create Room</TabsTrigger>
             </TabsList>
             <TabsContent value="join">
               <Form {...joinForm}>
@@ -125,9 +124,9 @@ const Landing = () => {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel className="text-white">Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your name" {...field} />
+                          <Input className="bg-gray-700 text-white" placeholder="Enter your name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -138,15 +137,15 @@ const Landing = () => {
                     name="roomCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Room Code</FormLabel>
+                        <FormLabel className="text-white">Room Code</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter room code" {...field} />
+                          <Input className="bg-gray-700 text-white" placeholder="Enter room code" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full bg-purple-600 text-white hover:bg-purple-500">
                     Join Room
                   </Button>
                 </form>
@@ -154,21 +153,22 @@ const Landing = () => {
             </TabsContent>
             <TabsContent value="create">
               <Form {...createForm}>
-                <form onSubmit={createForm.handleSubmit(handleCreateRoom)} className="space-y-4">
+                <form onSubmit={createForm.handleSubmit(handleCreateRoom)} className="flex flex-col space-y-6">
+
                   <FormField
                     control={createForm.control}
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel className="text-white">Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your name" {...field} />
+                          <Input className="bg-gray-700 text-white" placeholder="Enter your name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full bg-purple-600 text-white hover:bg-purple-500">
                     Create New Room
                   </Button>
                 </form>
