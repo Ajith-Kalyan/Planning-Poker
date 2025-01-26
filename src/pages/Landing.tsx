@@ -50,6 +50,7 @@ const Landing = () => {
     }
   }, [socket, toast]);
 
+  // Handle room creation
   const handleCreateRoom = (values: z.infer<typeof formSchema>) => {
     if (!socket) {
       toast({
@@ -60,9 +61,10 @@ const Landing = () => {
       return;
     }
 
-    socket.emit('create_room', { username: values.username }, (response: { roomId: string }) => {
+    socket.emit("create_room", { username: values.username }, (response: { roomId: string, userId: string }) => {
       if (response?.roomId) {
         console.log('Room created:', response.roomId);
+        sessionStorage.setItem('roomInfo', JSON.stringify(response));
         navigate(`/room/${response.roomId}`);
       } else {
         toast({
@@ -74,6 +76,7 @@ const Landing = () => {
     });
   };
 
+
   const handleJoinRoom = (values: z.infer<typeof formSchema>) => {
     if (!socket || !values.roomCode?.trim()) {
       toast({
@@ -84,11 +87,13 @@ const Landing = () => {
       return;
     }
 
-    socket.emit('join_room', { 
+    socket.emit('join_room', {
       roomId: values.roomCode,
-      username: values.username 
-    }, (response: { success: boolean, error?: string }) => {
+      username: values.username
+    }, (response: { success: boolean, error?: string, userId: string  }) => {
       if (response.success) {
+        console.log('Joined room:', values.roomCode);
+        sessionStorage.setItem('roomInfo', JSON.stringify(response));
         navigate(`/room/${values.roomCode}`);
       } else {
         toast({

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 interface RoomHeaderProps {
   roomId: string;
@@ -17,9 +18,19 @@ export const RoomHeader = ({
   onCopyCode,
   revealed,
 }: RoomHeaderProps) => {
+  const navigate = useNavigate(); // Initialize navigate
+
+  // Handle click on Planning Poker to reset session and navigate
+  const handleResetAndNavigate = () => {
+    sessionStorage.clear(); // Clear all session storage data
+    navigate("/"); // Redirect to the landing page ("/")
+  };
+
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-bold">Planning Poker</h1>
+      <h1 className="text-2xl font-bold cursor-pointer" onClick={handleResetAndNavigate}>
+        Planning Poker
+      </h1>
       <div className="flex gap-2">
         <Button variant="outline" onClick={onCopyCode}>
           Room: {roomId}
