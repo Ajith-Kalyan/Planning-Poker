@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +21,7 @@ const formSchema = z.object({
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { socket } = useSocket();
+  const { socket } = useSocket(); // Ensure socket comes from context
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('join');
 
@@ -40,12 +40,37 @@ const Landing = () => {
     },
   });
 
+  useEffect(() => {
+    if (!socket) {
+      toast({
+        title: "Error",
+        description: "Socket connection failed. Please refresh the page.",
+        variant: "destructive",
+      });
+    }
+  }, [socket, toast]);
+
   const handleCreateRoom = (values: z.infer<typeof formSchema>) => {
-    if (!socket) return;
-    
+    if (!socket) {
+      toast({
+        title: "Error",
+        description: "Socket not connected. Try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     socket.emit('create_room', { username: values.username }, (response: { roomId: string }) => {
-      console.log('Room created:', response.roomId);
-      navigate(`/room/${response.roomId}`);
+      if (response?.roomId) {
+        console.log('Room created:', response.roomId);
+        navigate(`/room/${response.roomId}`);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create room. Try again.",
+          variant: "destructive",
+        });
+      }
     });
   };
 
