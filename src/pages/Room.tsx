@@ -6,6 +6,7 @@ import { RoomHeader } from '@/components/RoomHeader';
 import { PlayersGrid } from '@/components/PlayersGrid';
 import { CardsSelection } from '@/components/CardsSelection';
 import { Player } from '@/Models/constants';
+import Confetti from "react-confetti";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -15,6 +16,7 @@ const Room = () => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
+  const [confettiActive, setConfettiActive] = useState(false);
 
   useEffect(() => {
     if (!socket || !roomId) return;
@@ -100,6 +102,11 @@ const Room = () => {
     if (!socket) return;
     socket.emit('reveal_votes', { roomId });
     setRevealed(true);
+
+    // setConfettiActive(true);
+    // setTimeout(() => {
+    //   setConfettiActive(false);
+    // }, 4000); 
   };
 
   const handleReset = () => {
@@ -117,6 +124,7 @@ const Room = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+      {confettiActive && <Confetti />}
       <div className="max-w-6xl mx-auto space-y-8">
         <RoomHeader
           roomId={roomId || ''}

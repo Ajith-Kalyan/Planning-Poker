@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css?family=Raleway:100");
+
+body {
+  font-family: 'Raleway', sans-serif;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -74,3 +80,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* @keyframes borderRotate {
+  100% {
+    --angle: 0deg;
+  }
+} */
+
+/* .animated-border {
+  --angle: 270deg;
+  --c1: rgb(212, 21, 212);
+  --c2: rgba(168, 239, 255, 0.1);
+  border-width: 8px;
+  border-style: solid;
+  border-image: conic-gradient(
+      from var(--angle),
+      var(--c2),
+      var(--c1) 0.1turn,
+      var(--c1) 0.25turn,
+      var(--c2) 0.35turn
+    )
+    1;
+  animation: borderRotate 2s linear infinite;
+} */
+

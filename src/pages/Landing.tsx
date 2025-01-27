@@ -41,6 +41,7 @@ const Landing = () => {
   });
 
   useEffect(() => {
+    sessionStorage.clear();
     if (!socket) {
       toast({
         title: "Error",

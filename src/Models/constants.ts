@@ -15,15 +15,15 @@ export interface Player {
       case '1':
         return "bg-gray-200";
       case '2':
-        return "bg-green-100";
+        return "bg-blue-100";
       case '3':
-        return "bg-green-200";
+        return "bg-green-100";
       case '5':
-        return "bg-green-300";
+        return "bg-green-200";
       case '8':
         return "bg-yellow-100";
       case '13':
-        return "bg-yellow-200";
+        return "bg-yellow-100";
       case '21':
         return "bg-red-200";
       default:
